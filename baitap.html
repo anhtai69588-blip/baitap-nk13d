@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Tập về nhà Lớp NK13D</title>
+    <style>
+        :root {
+            --teacher-color: #e67e22;
+            --student-color: #2ecc71;
+            --info-color: #2196F3;
+            --bg-color: #f0f7f4;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 20px; 
+            background-color: var(--bg-color);
+            margin: 0; padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .header { text-align: center; border-bottom: 3px solid #eee; padding-bottom: 20px; }
+        .header h1 { color: var(--info-color); }
+        
+        .nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; }
+        .nav-btn {
+            padding: 15px 20px; border: none; border-radius: 12px; cursor: pointer;
+            font-weight: bold; font-size: 18px; transition: 0.3s; background: #dfe6e9;
+        }
+        .nav-btn.active { background: var(--student-color); color: white; }
+        .nav-btn.teacher-only { background: #ffeaa7; border: 2px solid var(--teacher-color); }
+
+        .content-section { display: none; padding: 20px; border: 1px solid #eee; border-radius: 15px; }
+        .content-section.active { display: block; }
+
+        input, textarea {
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 2px solid #ddd; border-radius: 10px; font-size: 18px;
+            display: block; box-sizing: border-box;
+        }
+
+        label { font-weight: bold; margin-top: 15px; display: block; color: #555; }
+
+        .btn-submit {
+            background: var(--student-color); color: white; padding: 15px; 
+            border: none; border-radius: 15px; width: 100%; font-size: 20px; 
+            font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
+
+        .teacher-badge {
+            font-size: 14px; background: var(--teacher-color); color: white; 
+            padding: 2px 8px; border-radius: 5px; vertical-align: middle;
+        }
+
+        .card { border: 2px solid #ddd; padding: 20px; border-radius: 10px; margin-bottom: 15px; }
+        .card.teacher-card { border-color: var(--teacher-color); background: #fffdf5; }
+        .card.task-card { border-color: var(--info-color); background: #f4fafe; }
+        
+        .file-box {
+            background: white; border: 2px dashed var(--info-color); padding: 15px; 
+            border-radius: 8px; margin-top: 10px; font-size: 18px;
+        }
+        .file-link { 
+            color: var(--info-color); text-decoration: none; font-weight: bold; 
+            display: block; margin-top: 8px; padding: 8px; background: #e3f2fd; border-radius: 5px;
+        }
+        .file-link:hover { background: #bbdefb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏠 Bài Tập về nhà Lớp NK13D</h1>
+        <p id="role-text">Chế độ: <b>Học sinh / Phụ huynh</b></p>
+        <button onclick="loginTeacher()" id="login-btn" style="cursor:pointer; border:none; background:none; color:blue; text-decoration: underline;">Đăng nhập Giáo viên</button>
+    </div>
+
+    <div class="nav">
+        <button class="nav-btn active" onclick="showTab('tab-xembai')">📖 Bài Tập Mới</button>
+        <button class="nav-btn" onclick="showTab('tab-nop')">✍️ Nộp Bài</button>
+        <button class="nav-btn" onclick="showTab('tab-diem')">📊 Xem Điểm</button>
+        <button class="nav-btn teacher-only" onclick="checkTeacherAccess('tab-giao')">📋 Giao Bài <span class="teacher-badge">GV</span></button>
+        <button class="nav-btn teacher-only" onclick="checkTeacherAccess('tab-sua')">🛠 Chấm Bài <span class="teacher-badge">GV</span></button>
+    </div>
+
+    <div id="tab-xembai" class="content-section active">
+        <h2 style="color: var(--info-color);">📚 Danh Sách Bài Tập Cần Làm</h2>
+        <div id="danh-sach-bai-giao"></div>
+    </div>
+
+    <div id="tab-nop" class="content-section">
+        <h2>Thông tin nộp bài</h2>
+        <label>Tên của con:</label>
+        <input type="text" id="name" placeholder="Ví dụ: Nguyễn Gia Bảo">
+        
+        <label>Tải ảnh bài làm của con lên đây (Có thể chọn nhiều ảnh):</label>
+        <input type="file" multiple>
+
+        <button class="btn-submit" onclick="submitLesson()">NỘP BÀI NGAY</button>
+    </div>
+
+    <div id="tab-diem" class="content-section">
+        <h2>Kết quả của con</h2>
+        <div id="danh-sach-diem"></div>
+    </div>
+
+    <div id="tab-giao" class="content-section">
+        <h2 style="color: var(--teacher-color);">📢 Khu Vực Giao Bài Mới</h2>
+        
+        <label>Tên bài tập:</label>
+        <input type="text" id="ten-bai-giao" placeholder="VD: Bài tập cuối tuần - Môn Toán">
+        
+        <label>Lời dặn dò phụ huynh / Yêu cầu bài làm:</label>
+        <textarea id="noi-dung-giao" rows="3" placeholder="VD: Các con làm bài ra vở, nhờ bố mẹ chụp ảnh lại và nộp nhé..."></textarea>
+        
+        <label>Đính kèm file đề bài (Có thể chọn cùng lúc nhiều file):</label>
+        <input type="file" id="file-giao" multiple>
+
+        <button class="btn-submit" style="background: var(--teacher-color);" onclick="taoBaiTap()">ĐĂNG BÀI TẬP LÊN LỚP</button>
+    </div>
+
+    <div id="tab-sua" class="content-section">
+        <h2 style="color: var(--teacher-color);">📝 Khu Vực Chấm Điểm</h2>
+        <div id="danh-sach-cham-bai"></div>
+    </div>
+</div>
+
+<script>
+    let isTeacher = false;
+    const TEACHER_PASS = "123456"; 
+    
+    // DÁN ĐƯỜNG LINK GOOGLE SCRIPT CỦA BẠN VÀO GIỮA 2 DẤU NGOẶC KÉP BÊN DƯỚI:
+    const API_URL = https://script.google.com/macros/s/AKfycbzyB9ofE1lYc0zkIfR30L7QsRfBLqRlyokAL7Cr43kvjL2O9OCaqON_yp9M1gWiRXOb/exec; 
+    
+    let duLieuHocTap = []; 
+    let danhSachBaiTap = []; 
+
+    // HÀM TẢI DỮ LIỆU TỪ GOOGLE SHEETS KHI VỪA MỞ WEB
+    async function taiDuLieuTuMang() {
+        document.getElementById('danh-sach-bai-giao').innerHTML = "<p style='text-align:center;'>Đang tải dữ liệu từ máy chủ ⏳...</p>";
+        try {
+            let response = await fetch(API_URL);
+            let data = await response.json();
+            danhSachBaiTap = data.baiTap || [];
+            duLieuHocTap = data.hocSinh || [];
+            capNhatManHinhBaiTap();
+            capNhatManHinhDiem();
+        } catch (error) {
+            console.log("Lỗi tải dữ liệu:", error);
+            document.getElementById('danh-sach-bai-giao').innerHTML = "<p style='color:red;'>Lỗi mạng! Không thể tải dữ liệu.</p>";
+        }
+    }
+
+    // HÀM LƯU DỮ LIỆU LÊN GOOGLE SHEETS
+    async function dongBoLenMang() {
+        let btnText = document.getElementById('role-text');
+        btnText.innerHTML += " <span style='font-size:12px; color:blue;'>(Đang đồng bộ ⏳...)</span>";
+        
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ baiTap: danhSachBaiTap, hocSinh: duLieuHocTap })
+            });
+            alert("Đã đồng bộ dữ liệu lên máy chủ thành công! ✅");
+        } catch (error) {
+            alert("Lỗi khi đồng bộ lên máy chủ. Vui lòng kiểm tra mạng!");
+        }
+        
+        // Cập nhật lại chữ hiển thị
+        if(isTeacher) btnText.innerHTML = "Chế độ: <b style='color:orange'>Giáo viên</b>";
+        else btnText.innerHTML = "Chế độ: <b>Học sinh / Phụ huynh</b>";
+    }
+
+    function loginTeacher() {
+        let pass = prompt("Vui lòng nhập mã bảo mật của Giáo viên:");
+        if (pass === TEACHER_PASS) {
+            isTeacher = true;
+            document.getElementById('role-text').innerHTML = "Chế độ: <b style='color:orange'>Giáo viên</b>";
+            document.getElementById('login-btn').style.display = "none";
+            alert("Đăng nhập thành công! Thầy cô có thể Giao bài và Chấm bài.");
+            capNhatManHinhBaiTap(); 
+        } else {
+            alert("Mã không đúng!");
+        }
+    }
+
+    function checkTeacherAccess(tabId) {
+        if (isTeacher) { showTab(tabId); } 
+        else { alert("⚠️ Khu vực này chỉ dành cho Giáo viên!"); }
+    }
+
+    function showTab(tabId) {
+        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // --- 1. GIÁO VIÊN GIAO BÀI TẬP ---
+    function taoBaiTap() {
+        let tenBai = document.getElementById('ten-bai-giao').value;
+        let noiDung = document.getElementById('noi-dung-giao').value;
+        let fileInput = document.getElementById('file-giao');
+        
+        if(!tenBai) { alert("Cô hãy nhập tên bài tập nhé!"); return; }
+
+        let fileNames = [];
+        for (let i = 0; i < fileInput.files.length; i++) {
+            fileNames.push(fileInput.files[i].name);
+        }
+
+        danhSachBaiTap.push({
+            id: Date.now(),
+            ten: tenBai,
+            noidung: noiDung,
+            files: fileNames, 
+            ngayTao: new Date().toLocaleDateString('vi-VN')
+        });
+
+        document.getElementById('ten-bai-giao').value = "";
+        document.getElementById('noi-dung-giao').value = "";
+        fileInput.value = "";
+        
+        capNhatManHinhBaiTap();
+        dongBoLenMang(); // GỌI LỆNH LƯU LÊN MẠNG
+    }
+
+    function xoaBaiTap(id) {
+        if(confirm("Cô có chắc chắn muốn xóa bài tập này không?")) {
+            danhSachBaiTap = danhSachBaiTap.filter(bai => bai.id !== id);
+            capNhatManHinhBaiTap();
+            dongBoLenMang(); // GỌI LỆNH LƯU LÊN MẠNG
+        }
+    }
+
+    // --- 2. HIỂN THỊ DANH SÁCH BÀI TẬP ---
+    function capNhatManHinhBaiTap() {
+        let html = "";
+        if(danhSachBaiTap.length === 0) {
+            html = "<p style='color:gray; text-align:center;'>Hiện chưa có bài tập nào được giao.</p>";
+        } else {
+            [...danhSachBaiTap].reverse().forEach(bai => {
+                let filesHtml = "";
+                if (bai.files && bai.files.length > 0) {
+                    let danhSachLink = bai.files.map(f => `<a href="#" class="file-link">📎 ${f} (Tải về)</a>`).join('');
+                    filesHtml = `<div class="file-box"><b>Tài liệu đính kèm:</b>${danhSachLink}</div>`;
+                }
+                
+                let btnXoa = isTeacher ? `<button class="delete-btn" onclick="xoaBaiTap(${bai.id})">🗑 Xóa bài này</button>` : "";
+
+                html += `
+                <div class="card task-card">
+                    <h3 style="color: var(--info-color); margin-top:0;">📌 ${bai.ten}</h3>
+                    <p style="font-size: 16px; color: gray;">Ngày giao: ${bai.ngayTao}</p>
+                    <p>${bai.noidung.replace(/\n/g, '<br>')}</p>
+                    ${filesHtml}
+                    ${btnXoa}
+                </div>`;
+            });
+        }
+        document.getElementById('danh-sach-bai-giao').innerHTML = html;
+    }
+
+    // --- 3. HỌC SINH NỘP BÀI ---
+    function submitLesson() {
+        let name = document.getElementById('name').value;
+        if(!name) { alert("Con hãy điền tên trước khi nộp bài nhé!"); return; }
+        
+        duLieuHocTap.push({ id: Date.now(), ten: name, diem: "Đang chờ chấm ⏳", nhanXet: "Thầy cô chưa nhận xét." });
+        
+        document.getElementById('name').value = ""; 
+        capNhatManHinhDiem(); 
+        dongBoLenMang(); // GỌI LỆNH LƯU LÊN MẠNG
+    }
+
+    // --- 4. CẬP NHẬT MÀN HÌNH CHẤM BÀI & XEM ĐIỂM ---
+    function capNhatManHinhDiem() {
+        let htmlXemDiem = ""; let htmlChamBai = "";
+        if(duLieuHocTap.length === 0) {
+            htmlXemDiem = "<p style='color:gray; text-align:center;'>Chưa có bài tập nào được nộp.</p>";
+            htmlChamBai = "<p style='color:gray; text-align:center;'>Chưa có bài tập nào cần chấm.</p>";
+        } else {
+            duLieuHocTap.forEach(bai => {
+                let mauDiem = bai.diem.includes('chờ') ? 'orange' : 'red';
+                htmlXemDiem += `
+                <div class="card">
+                    <h3 style="margin-top:0;">👤 ${bai.ten}</h3>
+                    <p><b>Điểm số:</b> <span style="color: ${mauDiem}; font-weight: bold; font-size: 24px;">${bai.diem}</span></p>
+                    <p><b>Lời phê:</b> <i>${bai.nhanXet}</i></p>
+                </div>`;
+
+                htmlChamBai += `
+                <div class="card teacher-card">
+                    <h3 style="margin-top:0;">👤 Bài của: ${bai.ten}</h3>
+                    <input type="text" id="diem-${bai.id}" placeholder="Nhập điểm (VD: 9.5)...">
+                    <textarea id="nhanxet-${bai.id}" rows="2" placeholder="Nhập lời phê..."></textarea>
+                    <button class="btn-submit" style="background: var(--teacher-color);" onclick="luuDiem(${bai.id})">Lưu Bảng Điểm</button>
+                </div>`;
+            });
+        }
+        document.getElementById('danh-sach-diem').innerHTML = htmlXemDiem;
+        document.getElementById('danh-sach-cham-bai').innerHTML = htmlChamBai;
+    }
+
+    function luuDiem(idBaiTap) {
+        let diemNhapVao = document.getElementById(`diem-${idBaiTap}`).value;
+        let nhanXetNhapVao = document.getElementById(`nhanxet-${idBaiTap}`).value;
+        if(!diemNhapVao) { alert("Cô hãy nhập điểm cho con nhé!"); return; }
+
+        let baiCuaHocSinh = duLieuHocTap.find(b => b.id === idBaiTap);
+        if(baiCuaHocSinh) {
+            baiCuaHocSinh.diem = diemNhapVao + " Điểm";
+            baiCuaHocSinh.nhanXet = nhanXetNhapVao ? nhanXetNhapVao : "Cố gắng phát huy nhé!";
+            
+            capNhatManHinhDiem(); 
+            dongBoLenMang(); // GỌI LỆNH LƯU LÊN MẠNG
+        }
+    }
+
+    // Khởi chạy khi mở web: Lấy dữ liệu từ Google Sheets
+    window.onload = function() {
+        taiDuLieuTuMang();
+    };
+</script>
+
+</body>
+</html>
