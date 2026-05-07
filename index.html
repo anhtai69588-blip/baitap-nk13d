@@ -139,8 +139,8 @@
     let isTeacher = false;
     const TEACHER_PASS = "123456"; 
     
-    // DÁN ĐƯỜNG LINK GOOGLE SCRIPT CỦA BẠN VÀO GIỮA 2 DẤU NGOẶC KÉP BÊN DƯỚI:
-    const API_URL = https://script.google.com/macros/s/AKfycbzyB9ofE1lYc0zkIfR30L7QsRfBLqRlyokAL7Cr43kvjL2O9OCaqON_yp9M1gWiRXOb/exec; 
+    // Đã thêm dấu ngoặc kép "" bao quanh đường link
+    const API_URL = "https://script.google.com/macros/s/AKfycbzyB9ofE1lYc0zkIfR30L7QsRfBLqRlyokAL7Cr43kvjL2O9OCaqON_yp9M1gWiRXOb/exec"; 
     
     let duLieuHocTap = []; 
     let danhSachBaiTap = []; 
@@ -256,7 +256,7 @@
                     filesHtml = `<div class="file-box"><b>Tài liệu đính kèm:</b>${danhSachLink}</div>`;
                 }
                 
-                let btnXoa = isTeacher ? `<button class="delete-btn" onclick="xoaBaiTap(${bai.id})">🗑 Xóa bài này</button>` : "";
+                let btnXoa = isTeacher ? `<button class="delete-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;" onclick="xoaBaiTap(${bai.id})">🗑 Xóa bài này</button>` : "";
 
                 html += `
                 <div class="card task-card">
